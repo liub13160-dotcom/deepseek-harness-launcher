@@ -1,73 +1,84 @@
-# DeepSeek Harness 启动器（dsh-launcher）
+# dsh-launcher
 
-跨平台（Windows / macOS / Linux）的 DeepSeek Harness **多命令启动器**。
-一键启动 `dsh web`、查看状态、停止服务，并自动打开浏览器。
+<div align="center">
 
-## 安装
+**Cross-platform multi-command launcher for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)**
 
-前提：已通过 npm 全局安装 DeepSeek Harness（`npm i -g @deepseek-ai/dsh`），且 Node >= 16。
+One command to start · Auto-open the browser · Check status · Stop cleanly
 
-**方式一：直接运行（无需安装）**
+[![GitHub stars](https://img.shields.io/github/stars/liub13160-dotcom/deepseek-harness-launcher?style=social)](https://github.com/liub13160-dotcom/deepseek-harness-launcher)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D16-blue.svg)](package.json)
+
+</div>
+
+---
+
+## Why this?
+
+DeepSeek Harness's web UI is started with `dsh web` — but that leaves you to open a browser, remember the port (`3080`), and hunt down how to stop it. This tool wraps it into a **real cross-platform CLI**:
+
+- `start` → boots the harness and **auto-opens the browser** when it's ready
+- `status` → tells you whether it's running
+- `stop` → stops it cleanly (no more hunting for the PID)
+- `list` → shows your profiles
+- `doctor` → diagnoses your environment
+
+Works on **Windows / macOS / Linux** — no shell scripts, no platform-specific hacks.
+
+## Install / Run
+
+Requires Node.js ≥ 16 (you already have it, since DeepSeek Harness is npm-based).
 
 ```bash
+# run directly — no install needed
 node dsh-launcher.mjs <command>
+
+# or install once as a global command
+npm link                    # or: npm install -g .
+dsh-launcher <command>
 ```
 
-**方式二：全局注册为 `dsh-launcher` 命令**
+## Usage
 
 ```bash
-npm link                 # 或 npm install -g .
+dsh-launcher start                # start the web profile + open browser
+dsh-launcher start tui            # start another profile
+dsh-launcher start --port 8080    # custom port
+dsh-launcher status               # is it running?
+dsh-launcher stop                 # stop it
+dsh-launcher list                 # list profiles
+dsh-launcher doctor               # environment diagnostics
 dsh-launcher help
 ```
 
-## 命令
+| command | default | options |
+|---|---|---|
+| `start [profile]` | `web` | `--port`, `--host`, `--no-open`, `--detach` |
+| `status` | — | — |
+| `stop` | — | — |
+| `list` | — | — |
+| `doctor` | — | — |
 
-| 命令 | 说明 |
-|---|---|
-| `list` | 列出可用 profile 及默认端口运行状态 |
-| `start [profile]` | 启动指定 profile（默认 `web`），就绪后自动打开浏览器 |
-| `status` | 查看是否正在运行及相关信息 |
-| `stop` | 停止正在运行的 Harness |
-| `doctor` | 诊断环境（node / dsh / DSH_HOME / 端口） |
-| `help` | 显示帮助 |
+## Windows double-click
 
-`start` 选项
+Windows users can double-click `启动DeepSeek-Harness.bat` — same as `node dsh-launcher.mjs start`.
 
-| 选项 | 说明 |
-|---|---|
-| `--profile <name>` | 指定 profile（等价于位置参数） |
-| `--port <port>` | 端口（默认 3080） |
-| `--host <host>` | 绑定地址（默认 127.0.0.1） |
-| `--no-open` | 不自动打开浏览器 |
-| `--detach` | 后台运行并记录 PID，可用 `stop` 停止 |
+> That `.bat` is **GBK-encoded** for the Chinese console, so it shows as mojibake on GitHub but works locally.
 
-## 示例
+## How it works
 
-```bash
-dsh-launcher start               # 启动 web 并打开浏览器
-dsh-launcher start tui           # 启动 tui profile
-dsh-launcher start --port 8080   # 用 8080 端口启动
-dsh-launcher list
-dsh-launcher status
-dsh-launcher stop
-dsh-launcher doctor
-```
+`start` first probes the port. If it's already up → just opens the browser. Otherwise it runs
+`dsh --profile <profile> --host <host> --port <port> --no-open`, then polls until the port answers and
+opens your browser. `stop` finds the process either via a pidfile (`--detach`) or the port listener
+(`netstat` / `lsof`). **Zero third-party dependencies** — only Node built-ins.
 
-## Windows 双击
+## Files
 
-Windows 用户可直接双击 `启动DeepSeek-Harness.bat`，它会调用 `node dsh-launcher.mjs start`。
+- `dsh-launcher.mjs` — the CLI (single file, zero deps)
+- `启动DeepSeek-Harness.bat` — Windows wrapper
+- `package.json` — npm packaging / bin
 
-> 注：该 `.bat` 为 **GBK 编码**（匹配中文 Windows 控制台），在 GitHub 网页上预览会显示乱码，下载到本地后正常。
+## License
 
-## 工作原理
-
-- `start` 先探测端口是否已运行：已运行则直接打开浏览器；否则以 `dsh --profile <profile> --host <host> --port <port> --no-open` 启动，并轮询端口就绪后打开浏览器。
-- `stop` 通过 pidfile（`--detach` 启动的）或端口监听进程（Windows `netstat` / Unix `lsof`）定位并停止进程。
-- 无第三方依赖，仅用 Node 内置模块。
-
-## 文件
-
-- `dsh-launcher.mjs` — 跨平台 CLI 主程序
-- `启动DeepSeek-Harness.bat` — Windows 包装脚本
-- `package.json` — npm 打包 / bin 声明
-- `README.md` — 本说明
+[MIT](LICENSE)

@@ -1,11 +1,32 @@
 {
   "name": "dsh-launcher",
   "version": "1.0.0",
-  "description": "Cross-platform multi-command launcher for DeepSeek Harness (list / start / status / stop / doctor)",
+  "description": "Cross-platform multi-command launcher for DeepSeek Harness (list/start/status/stop/doctor)",
   "type": "module",
   "bin": {
     "dsh-launcher": "./dsh-launcher.mjs"
   },
+  "files": [
+    "dsh-launcher.mjs"
+  ],
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "launcher",
+    "cli",
+    "cross-platform",
+    "windows",
+    "harness"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liub13160-dotcom/deepseek-harness-launcher.git"
+  },
+  "homepage": "https://github.com/liub13160-dotcom/deepseek-harness-launcher#readme",
+  "bugs": {
+    "url": "https://github.com/liub13160-dotcom/deepseek-harness-launcher/issues"
+  },
+  "author": "liub13160-dotcom",
   "engines": {
     "node": ">=16"
   },
