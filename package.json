@@ -1,0 +1,13 @@
+{
+  "name": "dsh-launcher",
+  "version": "1.0.0",
+  "description": "Cross-platform multi-command launcher for DeepSeek Harness (list / start / status / stop / doctor)",
+  "type": "module",
+  "bin": {
+    "dsh-launcher": "./dsh-launcher.mjs"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "MIT"
+}
