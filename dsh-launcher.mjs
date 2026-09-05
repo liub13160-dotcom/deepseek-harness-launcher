@@ -27,18 +27,6 @@ function hasDsh() {
   try { execSync(cmd, { stdio: 'ignore' }); return true; } catch { return false; }
 }
 
-function dshExe() {
-  // Windows 上 dsh 是 npm 全局安装的 dsh.cmd；其它平台是 dsh
-  if (process.platform === 'win32') {
-    try {
-      const out = execSync('where dsh', { encoding: 'utf8' });
-      const first = out.split(/\r?\n/).map(s => s.trim()).filter(l => /\.cmd$/i.test(l));
-      return first[0] || 'dsh.cmd';
-    } catch { return 'dsh.cmd'; }
-  }
-  try { return execSync('which dsh', { encoding: 'utf8' }).trim(); } catch { return 'dsh'; }
-}
-
 function isPortOpen(host, port, timeout = 1500) {
   return new Promise(resolve => {
     const req = http.get({ host, port, timeout }, res => { res.resume(); resolve(true); });
@@ -206,13 +194,17 @@ async function cmdStart(args) {
     warn(`未知 profile: ${profile}（可用: ${profiles.join(', ')}）`); process.exit(1);
   }
 
-  const exe = dshExe();
+  const isWin = process.platform === 'win32';
   const dargs = isWeb ? ['--profile', profile, '--host', host, '--port', String(port), '--no-open'] : ['--profile', profile];
+  // Windows 上 .cmd 不能直接被 spawn（会报 EINVAL），改用 cmd.exe /c dsh 让 cmd 在 PATH 里解析 dsh.cmd；
+  // 其它平台直接 exec dsh（npm bin 的 shebang 脚本）。
+  const spawnCmd = isWin ? 'cmd.exe' : 'dsh';
+  const spawnArgs = isWin ? ['/c', 'dsh', ...dargs] : dargs;
 
   log(`启动 dsh ${profile}  @ ${host}:${port} ...`);
   let child;
   try {
-    child = spawn(exe, dargs, { stdio: detach ? 'ignore' : 'inherit', detached: detach });
+    child = spawn(spawnCmd, spawnArgs, { stdio: detach ? 'ignore' : 'inherit', detached: detach, shell: false });
   } catch (e) { warn('启动失败: ' + e.message); process.exit(1); }
 
   if (detach) {
